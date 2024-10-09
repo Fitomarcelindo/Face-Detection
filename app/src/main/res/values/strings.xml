@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">face_apps_detection</string>
+
+    //mainPage
+    <string name="camera">Camera</string>
+    <string name="history">History</string>
+    <string name="analyze">Analyze</string>
+    <string name="desc">Description</string>
+    <string name="save">Save</string>
+    <string name="logout">Logout</string>
+    <string name="gallery">Gallery</string>
+    <string name="result">Result</string>
+    <string name="delete">Delete</string>
+
+</resources>

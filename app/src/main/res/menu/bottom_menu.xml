@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/bottom_gallery"
+        android:icon="@drawable/btn_gallery"
+        android:background="@drawable/item_background"
+        android:title="@string/gallery" />
+    <item
+        android:id="@+id/btm_history"
+        android:icon="@drawable/btn_history"
+        android:background="@drawable/item_background"
+        android:title="@string/history" />
+    <item
+        android:id="@+id/bottom_camera"
+        android:icon="@drawable/btn_camera"
+        android:background="@drawable/item_background"
+        android:title="@string/camera" />
+    <item
+        android:id="@+id/bottom_logout"
+        android:icon="@drawable/btn_exit"
+        android:background="@drawable/item_background"
+        android:title="@string/logout" />
+</menu>

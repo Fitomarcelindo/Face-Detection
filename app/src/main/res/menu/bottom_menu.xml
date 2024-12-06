@@ -6,7 +6,7 @@
         android:background="@drawable/item_background"
         android:title="@string/gallery" />
     <item
-        android:id="@+id/btm_history"
+        android:id="@+id/bottom_history"
         android:icon="@drawable/btn_history"
         android:background="@drawable/item_background"
         android:title="@string/history" />
@@ -16,8 +16,8 @@
         android:background="@drawable/item_background"
         android:title="@string/camera" />
     <item
-        android:id="@+id/bottom_logout"
-        android:icon="@drawable/btn_exit"
+        android:id="@+id/bottom_detection"
+        android:icon="@drawable/baseline_image_search_24"
         android:background="@drawable/item_background"
-        android:title="@string/logout" />
+        android:title="@string/object" />
 </menu>

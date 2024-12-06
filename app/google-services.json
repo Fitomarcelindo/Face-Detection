@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "383170978697",
+    "project_id": "face-apps-detection",
+    "storage_bucket": "face-apps-detection.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:383170978697:android:2f204b65a208ab41587758",
+        "android_client_info": {
+          "package_name": "by.marcel.face_apps_detection"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCUcmKdl9iE58rd1Cum_TxSpJwllRZe0s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

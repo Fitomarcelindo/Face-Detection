@@ -15,7 +15,7 @@ import java.text.NumberFormat
 import java.util.LinkedList
 import kotlin.math.max
 
-class OverlayView @JvmOverloads constructor(
+class OverlayView@JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : View(context, attrs) {
@@ -34,7 +34,7 @@ class OverlayView @JvmOverloads constructor(
     }
 
     private fun initPaints() {
-        boxPaint.color = ContextCompat.getColor(context, R.color.yellow)
+        boxPaint.color = ContextCompat.getColor(context, R.color.purple)
         boxPaint.style = Paint.Style.STROKE
         boxPaint.strokeWidth = 8f
 

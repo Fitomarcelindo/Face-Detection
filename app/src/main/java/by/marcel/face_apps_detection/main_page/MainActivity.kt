@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        supportActionBar?.show()
+        supportActionBar?.hide()
 
         imageClassifier = ImageDetection(this)
 

@@ -1,21 +1,28 @@
 package by.marcel.face_apps_detection.Camera
 
-import ObjectDetectorHelper
+
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.view.WindowInsets
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
 import by.marcel.face_apps_detection.databinding.ActivityCameraBinding
+import by.marcel.face_apps_detection.helper.ObjectDetectorHelper
 import org.tensorflow.lite.task.gms.vision.detector.Detection
+import java.text.NumberFormat
+import java.util.concurrent.Executors
 
-class CameraActivity : AppCompatActivity() {
+class CameraActivity  : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
     private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
     private lateinit var objectDetectorHelper: ObjectDetectorHelper
-    private lateinit var cameraProvider: ProcessCameraProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +30,15 @@ class CameraActivity : AppCompatActivity() {
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        hideSystemUI()
+        startCamera()
+    }
+
+    private fun startCamera() {
         objectDetectorHelper = ObjectDetectorHelper(
             context = this,
             detectorListener = object : ObjectDetectorHelper.DetectorListener {
@@ -31,60 +47,86 @@ class CameraActivity : AppCompatActivity() {
                         Toast.makeText(this@CameraActivity, error, Toast.LENGTH_SHORT).show()
                     }
                 }
-
                 override fun onResults(
-                    results: List<Detection>?,
+                    results: MutableList<Detection>?,
                     inferenceTime: Long,
                     imageHeight: Int,
                     imageWidth: Int
                 ) {
                     runOnUiThread {
-                        // Kirim hasil deteksi ke OverlayView
-                        val boundingBoxes = results?.map { detection ->
-                            detection.boundingBox
-                        } ?: emptyList()
+                        results?.let {
+                            if (it.isNotEmpty() && it[0].categories.isNotEmpty()) {
+                                println(it)
+                                binding.overlay.setResults(
+                                    results, imageHeight, imageWidth
+                                )
 
-                        (binding.overlay).invalidate()
+                                val builder = StringBuilder()
+                                for (result in results) {
+                                    val displayResult =
+                                        "${result.categories[0].label} " + NumberFormat.getPercentInstance()
+                                            .format(result.categories[0].score).trim()
+                                    builder.append("$displayResult \n")
+                                }
+
+                                binding.tvResult.text = builder.toString()
+                                binding.tvInferenceTime.text = "$inferenceTime ms"
+                            } else {
+                                binding.overlay.clear()
+                                binding.tvResult.text = ""
+                                binding.tvInferenceTime.text = ""
+                            }
+                        }
+
+                        // Force a redraw
+                        binding.overlay.invalidate()
                     }
                 }
             }
         )
 
-        startCamera()
-    }
-
-    private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+
         cameraProviderFuture.addListener({
-            cameraProvider = cameraProviderFuture.get()
-
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
-            }
-
-            val imageAnalysis = ImageAnalysis.Builder()
-                .setTargetResolution(android.util.Size(1280, 720))
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            val resolutionSelector = ResolutionSelector.Builder()
+                .setAspectRatioStrategy(AspectRatioStrategy.RATIO_16_9_FALLBACK_AUTO_STRATEGY)
                 .build()
-
-            imageAnalysis.setAnalyzer(
-                ContextCompat.getMainExecutor(this)
-            ) { image ->
+            val imageAnalyzer = ImageAnalysis.Builder().setResolutionSelector(resolutionSelector)
+                .setTargetRotation(binding.viewFinder.display.rotation)
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888).build()
+            imageAnalyzer.setAnalyzer(Executors.newSingleThreadExecutor()) { image ->
                 objectDetectorHelper.detectObject(image)
             }
 
+            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            val preview = Preview.Builder().build().also {
+                it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+            }
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
-                    this as LifecycleOwner,
-                    cameraSelector,
-                    preview,
-                    imageAnalysis
+                    this, cameraSelector, preview, imageAnalyzer
                 )
             } catch (exc: Exception) {
-                Toast.makeText(this, "Camera initialization failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@CameraActivity, "Gagal memunculkan kamera.", Toast.LENGTH_SHORT
+                ).show()
+                Log.e(TAG, "startCamera: ${exc.message}")
             }
         }, ContextCompat.getMainExecutor(this))
+    }
+
+    private fun hideSystemUI() {
+        @Suppress("DEPRECATION") if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.hide(WindowInsets.Type.statusBars())
+        } else {
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
+            )
+        }
+        supportActionBar?.hide()
     }
 
     companion object {
